@@ -115,7 +115,7 @@
             товарыToolStripMenuItem.Name = "товарыToolStripMenuItem";
             товарыToolStripMenuItem.Size = new Size(75, 20);
             товарыToolStripMenuItem.Text = "Операции";
-            товарыToolStripMenuItem.Click += this.товарыToolStripMenuItem_Click;
+
             // 
             // добавитьТоварToolStripMenuItem
             // 
