@@ -1,318 +1,490 @@
-using System;
+п»їusing System;
 using System.Collections.Generic;
-using System.Windows.Forms;
+
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using Tyuiu.ZavyalovKA.Sprint7.Task0.V5.Lib;
 
 namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
 {
     public partial class FormMain : Form
     {
         private List<Product> products = new List<Product>();
-        private string dataFilePath = "products.txt";
+        private readonly string dataFilePath = "products.csv";
+        private readonly string backupFilePath = "products_backup.csv";
+        private readonly DataService dataService = new DataService();
 
         public FormMain()
         {
             InitializeComponent();
-            UpdateStatusBar();
-            LoadSampleData(); 
+            ConfigureDataGridView();
+            LoadData();
+            InitializeEventHandlers();
         }
 
-        // Загружаем тестовые данные
-        private void LoadSampleData()
+        private void ConfigureDataGridView()
         {
-            products.Add(new Product("001", "Молоко", 100, 85.50m, "Молоко 2.5%"));
-            products.Add(new Product("002", "Хлеб", 50, 45.00m, "Хлеб белый нарезной"));
-            products.Add(new Product("003", "Яйца", 200, 95.00m, "Яйца куриные С0"));
-            products.Add(new Product("004", "Сахар", 75, 65.00m, "Сахар песок 1кг"));
-            products.Add(new Product("005", "Масло", 30, 120.00m, "Масло сливочное 82%"));
+            dataGridViewProducts.AutoGenerateColumns = false;
+            CodeColumn.DataPropertyName = "Code";
+            NameColumn.DataPropertyName = "Name";
+            QuantityColumn.DataPropertyName = "Quantity";
+            PriceColumn.DataPropertyName = "Price";
+            DescriptionColumn.DataPropertyName = "Description";
 
-            RefreshDataGridView();
+            // РќР°СЃС‚СЂР°РёРІР°РµРј С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ
+            QuantityColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            PriceColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            PriceColumn.DefaultCellStyle.Format = "C2";
         }
 
-        // Обновляем DataGridView
+        private void InitializeEventHandlers()
+        {
+            // РљРЅРѕРїРєРё РїР°РЅРµР»Рё РёРЅСЃС‚СЂСѓРјРµРЅС‚РѕРІ
+            buttonAddProduct.Click += ButtonAddProduct_Click;
+            buttonEditProduct.Click += ButtonEditProduct_Click;
+            buttonDeleteProduct.Click += ButtonDeleteProduct_Click;
+            buttonSearch.Click += ButtonSearch_Click;
+            buttonSort.Click += ButtonSort_Click;
+            buttonFilter.Click += ButtonFilter_Click;
+            buttonSave.Click += ButtonSave_Click;
+            buttonLoad.Click += ButtonLoad_Click;
+            buttonStatistics.Click += ButtonStatistics_Click;
+            buttonChart.Click += ButtonChart_Click;
+
+            // РџРѕРёСЃРє
+            buttonSearchExecute.Click += ButtonSearchExecute_Click;
+            buttonClearSearch.Click += ButtonClearSearch_Click;
+            textBox1.KeyPress += TextBoxSearch_KeyPress;
+
+            // РњРµРЅСЋ
+            РґРѕР±Р°РІРёС‚СЊРўРѕРІР°СЂToolStripMenuItem.Click += ButtonAddProduct_Click;
+            СЂРµРґР°РєС‚РёСЂРѕРІР°С‚СЊToolStripMenuItem.Click += ButtonEditProduct_Click;
+            СѓРґР°Р»РёС‚СЊToolStripMenuItem.Click += ButtonDeleteProduct_Click;
+            РїРѕРёСЃРєToolStripMenuItem.Click += ButtonSearch_Click;
+            СЃРѕСЂС‚РёСЂРѕРІРєР°ToolStripMenuItem.Click += ButtonSort_Click;
+            С„РёР»СЊС‚СЂР°С†РёСЏToolStripMenuItem.Click += ButtonFilter_Click;
+            РѕС‚РєСЂС‹С‚СЊToolStripMenuItem.Click += ButtonLoad_Click;
+            СЃРѕС…СЂР°РЅРёС‚СЊToolStripMenuItem.Click += ButtonSave_Click;
+            СЃС‚Р°С‚РёСЃС‚РёРєР°ToolStripMenuItem.Click += ButtonStatistics_Click;
+            РіСЂР°С„РёРєРёToolStripMenuItem.Click += ButtonChart_Click;
+            РѕРџСЂРѕРіСЂР°РјРјРµToolStripMenuItem.Click += РћРџСЂРѕРіСЂР°РјРјРµToolStripMenuItem_Click;
+
+            // РўР°Р±Р»РёС†Р°
+            dataGridViewProducts.CellDoubleClick += DataGridViewProducts_CellDoubleClick;
+
+            // Р¤РѕСЂРјР°
+            this.Load += FormMain_Load;
+        }
+
+        private void LoadData()
+        {
+            try
+            {
+                if (File.Exists(dataFilePath))
+                {
+                    products = LoadFromCSV(dataFilePath);
+                    if (products.Count == 0)
+                    {
+                        LoadDefaultProducts();
+                        SaveToCSV(dataFilePath);
+                    }
+                }
+                else
+                {
+                    LoadDefaultProducts();
+                    SaveToCSV(dataFilePath);
+                }
+
+                RefreshDataGridView();
+                UpdateStatusBar($"Р—Р°РіСЂСѓР¶РµРЅРѕ {products.Count} Р·Р°РїРёСЃРµР№");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…: {ex.Message}", "РћС€РёР±РєР°",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LoadDefaultProducts();
+                RefreshDataGridView();
+            }
+        }
+
+        private void LoadDefaultProducts()
+        {
+            products.Clear();
+            products.Add(new Product("001", "РњРѕР»РѕРєРѕ", 100, 85.50m, "РњРѕР»РѕРєРѕ 2.5%"));
+            products.Add(new Product("002", "РҐР»РµР±", 50, 45.00m, "РҐР»РµР± Р±РµР»С‹Р№"));
+            products.Add(new Product("003", "РЇР№С†Р°", 200, 95.00m, "РЇР№С†Р° РЎ0"));
+            products.Add(new Product("004", "РЎР°С…Р°СЂ", 75, 65.00m, "РЎР°С…Р°СЂ 1РєРі"));
+            products.Add(new Product("005", "РњР°СЃР»Рѕ", 30, 120.00m, "РњР°СЃР»Рѕ 82%"));
+        }
+
+        private List<Product> LoadFromCSV(string path)
+        {
+            var list = new List<Product>();
+
+            try
+            {
+                if (!File.Exists(path)) return list;
+
+                var lines = File.ReadAllLines(path, Encoding.UTF8);
+                if (lines.Length < 2) return list;
+
+                for (int i = 1; i < lines.Length; i++)
+                {
+                    var line = lines[i];
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+
+                    var parts = ParseCSVLine(line);
+                    if (parts.Length >= 5)
+                    {
+                        list.Add(new Product(
+                            parts[0].Trim(),
+                            parts[1].Trim(),
+                            int.TryParse(parts[2], out int q) ? q : 0,
+                            decimal.TryParse(parts[3], out decimal p) ? p : 0,
+                            parts[4].Trim()
+                        ));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"РћС€РёР±РєР° С‡С‚РµРЅРёСЏ С„Р°Р№Р»Р°: {ex.Message}", ex);
+            }
+
+            return list;
+        }
+
+        private string[] ParseCSVLine(string line)
+        {
+            var result = new List<string>();
+            bool inQuotes = false;
+            int startIndex = 0;
+
+            for (int i = 0; i < line.Length; i++)
+            {
+                if (line[i] == '"')
+                {
+                    inQuotes = !inQuotes;
+                }
+                else if (line[i] == ',' && !inQuotes)
+                {
+                    result.Add(line.Substring(startIndex, i - startIndex).Trim('"'));
+                    startIndex = i + 1;
+                }
+            }
+
+            result.Add(line.Substring(startIndex).Trim('"'));
+            return result.ToArray();
+        }
+
+        private void SaveToCSV(string path)
+        {
+            try
+            {
+                var lines = new List<string> { "Code,Name,Quantity,Price,Description" };
+
+                foreach (var product in products)
+                {
+                    var line = $"{product.Code}," +
+                               $"{EscapeCSVField(product.Name)}," +
+                               $"{product.Quantity}," +
+                               $"{product.Price:F2}," +
+                               $"{EscapeCSVField(product.Description)}";
+                    lines.Add(line);
+                }
+
+                File.WriteAllLines(path, lines, Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ С„Р°Р№Р»Р°: {ex.Message}", ex);
+            }
+        }
+
+        private string EscapeCSVField(string field)
+        {
+            if (string.IsNullOrEmpty(field)) return "";
+
+            if (field.Contains(",") || field.Contains("\"") || field.Contains("\n") || field.Contains("\r"))
+            {
+                return $"\"{field.Replace("\"", "\"\"")}\"";
+            }
+
+            return field;
+        }
+
         private void RefreshDataGridView()
         {
-            dataGridViewProducts.Rows.Clear();
+            // РџСЂРёРІСЏР·С‹РІР°РµРј РґР°РЅРЅС‹Рµ
+            dataGridViewProducts.DataSource = null;
+            dataGridViewProducts.DataSource = products;
 
-            foreach (var product in products)
-            {
-                dataGridViewProducts.Rows.Add(
-                    product.Code,
-                    product.Name,
-                    product.Quantity,
-                    product.Price,
-                    product.Description
-                );
-            }
-
+            // РћР±РЅРѕРІР»СЏРµРј СЃС‚Р°С‚СѓСЃ Р±Р°СЂ
             UpdateStatusBar();
         }
 
-        // Обновляем статусную строку
-        private void UpdateStatusBar()
+        private void UpdateStatusBar(string status = "")
         {
-            toolStripStatusLabelCount.Text = $"Записей: {products.Count}";
-            toolStripStatusLabelData.Text = $"Дата: {DateTime.Now:dd.MM.yyyy}";
-        }
+            toolStripStatusLabelCount.Text = $"Р—Р°РїРёСЃРµР№: {products.Count}";
+            toolStripStatusLabelData.Text = $"Р”Р°С‚Р°: {DateTime.Now:dd.MM.yyyy}";
 
-        // 1. Кнопка "Добавить"
-        private void buttonAddProduct_Click(object sender, EventArgs e)
-        {
-            // Создаем диалоговое окно для добавления
-            FormAddEditProduct form = new FormAddEditProduct();
-            form.Text = "Добавить товар";
-
-            if (form.ShowDialog() == DialogResult.OK)
+            if (!string.IsNullOrEmpty(status))
             {
-                // Генерируем код (можно улучшить)
-                string newCode = (products.Count + 1).ToString("D3");
+                toolStripStatusLabelInfo.Text = status;
+            }
 
-                Product newProduct = new Product(
-                    newCode,
-                    form.ProductName,
-                    form.Quantity,
-                    form.Price,
-                    form.Description
-                );
-
-                products.Add(newProduct);
-                RefreshDataGridView();
-                toolStripStatusLabelInfo.Text = "Товар добавлен";
+            // Р Р°СЃСЃС‡РёС‚С‹РІР°РµРј РѕР±С‰СѓСЋ СЃС‚РѕРёРјРѕСЃС‚СЊ
+            if (products.Count > 0)
+            {
+                decimal totalValue = products.Sum(p => p.Quantity * p.Price);
+                toolStripStatusLabelInfo.Text += $" | РћР±С‰Р°СЏ СЃС‚РѕРёРјРѕСЃС‚СЊ: {totalValue:C2}";
             }
         }
 
-        // 2. Кнопка "Редактировать"
-        private void buttonEditProduct_Click(object sender, EventArgs e)
+        private void SearchProducts(string searchText)
+        {
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                RefreshDataGridView();
+                UpdateStatusBar("РџРѕРёСЃРє РѕС‡РёС‰РµРЅ");
+                return;
+            }
+
+            var result = products.Where(p =>
+                p.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                p.Code.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                p.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            dataGridViewProducts.DataSource = result;
+            UpdateStatusBar($"РќР°Р№РґРµРЅРѕ: {result.Count} С‚РѕРІР°СЂРѕРІ");
+        }
+
+        private void SortProducts()
+        {
+            products = dataService.SortProductsByName(products, true);
+            RefreshDataGridView();
+            UpdateStatusBar("РћС‚СЃРѕСЂС‚РёСЂРѕРІР°РЅРѕ РїРѕ РЅР°Р·РІР°РЅРёСЋ");
+        }
+
+        private void FilterProducts()
+        {
+            var filtered = dataService.FilterProductsByQuantityRange(products, 10, int.MaxValue);
+            dataGridViewProducts.DataSource = filtered;
+            UpdateStatusBar($"РћС‚С„РёР»СЊС‚СЂРѕРІР°РЅРѕ: {filtered.Count} С‚РѕРІР°СЂРѕРІ (РєРѕР»РёС‡РµСЃС‚РІРѕ в‰Ґ 10)");
+        }
+        private void ButtonAddProduct_Click(object sender, EventArgs e)
+        {
+            using (var form = new FormAddEditProduct())
+            {
+                if (form.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        string code = dataService.GenerateNextProductCode(products);
+                        var newProduct = new Product(
+                            code,
+                            form.ItemName,          
+                            form.ItemQuantity,      
+                            form.ItemPrice,         
+                            form.ItemDescription);  
+
+                        products.Add(newProduct);
+                        SaveToCSV(dataFilePath);
+                        RefreshDataGridView();
+                        UpdateStatusBar("РўРѕРІР°СЂ РґРѕР±Р°РІР»РµРЅ");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"РћС€РёР±РєР° РґРѕР±Р°РІР»РµРЅРёСЏ С‚РѕРІР°СЂР°: {ex.Message}", "РћС€РёР±РєР°",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void ButtonEditProduct_Click(object sender, EventArgs e)
         {
             if (dataGridViewProducts.SelectedRows.Count == 0)
             {
-                MessageBox.Show("Выберите товар для редактирования", "Внимание",
-                              MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Р’С‹Р±РµСЂРёС‚Рµ С‚РѕРІР°СЂ РґР»СЏ СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ", "РРЅС„РѕСЂРјР°С†РёСЏ",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            int selectedIndex = dataGridViewProducts.SelectedRows[0].Index;
-            Product selectedProduct = products[selectedIndex];
+            var selectedRow = dataGridViewProducts.SelectedRows[0];
+            var product = selectedRow.DataBoundItem as Product;
 
-            FormAddEditProduct form = new FormAddEditProduct();
-            form.Text = "Редактировать товар";
-            form.ProductName = selectedProduct.Name;
-            form.Quantity = selectedProduct.Quantity;
-            form.Price = selectedProduct.Price;
-            form.Description = selectedProduct.Description;
+            if (product == null) return;
 
-            if (form.ShowDialog() == DialogResult.OK)
+            using (var form = new FormAddEditProduct())
             {
-                selectedProduct.Name = form.ProductName;
-                selectedProduct.Quantity = form.Quantity;
-                selectedProduct.Price = form.Price;
-                selectedProduct.Description = form.Description;
+                form.ItemName = product.Name;           
+                form.ItemQuantity = product.Quantity;   
+                form.ItemPrice = product.Price;         
+                form.ItemDescription = product.Description; 
 
-                RefreshDataGridView();
-                toolStripStatusLabelInfo.Text = "Товар отредактирован";
+                if (form.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        string originalCode = product.Code;
+                        product.Name = form.ItemName;           
+                        product.Quantity = form.ItemQuantity;   
+                        product.Price = form.ItemPrice;        
+                        product.Description = form.ItemDescription; 
+                        product.Code = originalCode;
+                        SaveToCSV(dataFilePath);
+                        RefreshDataGridView();
+                        UpdateStatusBar("РўРѕРІР°СЂ РёР·РјРµРЅС‘РЅ");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"РћС€РёР±РєР° СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ С‚РѕРІР°СЂР°: {ex.Message}", "РћС€РёР±РєР°",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
             }
         }
 
-        // 3. Кнопка "Удалить"
-        private void buttonDeleteProduct_Click(object sender, EventArgs e)
+        private void ButtonDeleteProduct_Click(object sender, EventArgs e)
         {
             if (dataGridViewProducts.SelectedRows.Count == 0)
             {
-                MessageBox.Show("Выберите товар для удаления", "Внимание",
-                              MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Р’С‹Р±РµСЂРёС‚Рµ С‚РѕРІР°СЂ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ", "РРЅС„РѕСЂРјР°С†РёСЏ",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            var result = MessageBox.Show("Вы уверены, что хотите удалить выбранный товар?",
-                                       "Подтверждение удаления",
-                                       MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var selectedRow = dataGridViewProducts.SelectedRows[0];
+            var product = selectedRow.DataBoundItem as Product;
 
-            if (result == DialogResult.Yes)
+            if (product == null) return;
+
+            if (MessageBox.Show($"РЈРґР°Р»РёС‚СЊ С‚РѕРІР°СЂ '{product.Name}'?", "РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                int selectedIndex = dataGridViewProducts.SelectedRows[0].Index;
-                products.RemoveAt(selectedIndex);
-                RefreshDataGridView();
-                toolStripStatusLabelInfo.Text = "Товар удален";
-            }
-        }
-
-        // 4. Кнопка "Поиск"
-        private void buttonSearch_Click(object sender, EventArgs e)
-        {
-            string searchText = textBox1.Text.Trim().ToLower();
-
-            if (string.IsNullOrEmpty(searchText))
-            {
-                RefreshDataGridView();
-                return;
-            }
-
-            dataGridViewProducts.Rows.Clear();
-
-            foreach (var product in products)
-            {
-                if (product.Name.ToLower().Contains(searchText) ||
-                    product.Code.ToLower().Contains(searchText) ||
-                    product.Description.ToLower().Contains(searchText))
+                try
                 {
-                    dataGridViewProducts.Rows.Add(
-                        product.Code,
-                        product.Name,
-                        product.Quantity,
-                        product.Price,
-                        product.Description
-                    );
+                    products.Remove(product);
+                    SaveToCSV(dataFilePath);
+                    RefreshDataGridView();
+                    UpdateStatusBar("РўРѕРІР°СЂ СѓРґР°Р»С‘РЅ");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ С‚РѕРІР°СЂР°: {ex.Message}", "РћС€РёР±РєР°",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-
-            toolStripStatusLabelInfo.Text = $"Найдено записей: {dataGridViewProducts.Rows.Count}";
         }
 
-        // 5. Кнопка "Сохранить"
-        private void buttonSave_Click(object sender, EventArgs e)
+        private void ButtonSearch_Click(object sender, EventArgs e)
+        {
+            textBox1.Focus();
+        }
+
+        private void ButtonSearchExecute_Click(object sender, EventArgs e)
+        {
+            SearchProducts(textBox1.Text);
+        }
+
+        private void ButtonClearSearch_Click(object sender, EventArgs e)
+        {
+            textBox1.Clear();
+            RefreshDataGridView();
+            UpdateStatusBar("РџРѕРёСЃРє РѕС‡РёС‰РµРЅ");
+        }
+
+        private void TextBoxSearch_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                SearchProducts(textBox1.Text);
+                e.Handled = true;
+            }
+        }
+
+        private void ButtonSort_Click(object sender, EventArgs e)
+        {
+            SortProducts();
+        }
+
+        private void ButtonFilter_Click(object sender, EventArgs e)
+        {
+            FilterProducts();
+        }
+
+        private void ButtonSave_Click(object sender, EventArgs e)
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(dataFilePath))
-                {
-                    foreach (var product in products)
-                    {
-                        writer.WriteLine($"{product.Code}|{product.Name}|{product.Quantity}|{product.Price}|{product.Description}");
-                    }
-                }
-
-                MessageBox.Show("Данные сохранены успешно", "Сохранение",
-                              MessageBoxButtons.OK, MessageBoxIcon.Information);
-                toolStripStatusLabelInfo.Text = "Данные сохранены в файл";
+                SaveToCSV(dataFilePath);
+                UpdateStatusBar("Р”Р°РЅРЅС‹Рµ СЃРѕС…СЂР°РЅРµРЅС‹ РІ CSV");
+                MessageBox.Show("Р”Р°РЅРЅС‹Рµ СѓСЃРїРµС€РЅРѕ СЃРѕС…СЂР°РЅРµРЅС‹", "РЈСЃРїРµС…",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при сохранении: {ex.Message}", "Ошибка",
-                              MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ: {ex.Message}", "РћС€РёР±РєР°",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // 6. Кнопка "Загрузить"
-        private void buttonLoad_Click(object sender, EventArgs e)
+        private void ButtonLoad_Click(object sender, EventArgs e)
         {
-            if (!File.Exists(dataFilePath))
-            {
-                MessageBox.Show("Файл данных не найден", "Внимание",
-                              MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            try
-            {
-                products.Clear();
-
-                using (StreamReader reader = new StreamReader(dataFilePath))
-                {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        string[] parts = line.Split('|');
-                        if (parts.Length == 5)
-                        {
-                            products.Add(new Product(
-                                parts[0],
-                                parts[1],
-                                int.Parse(parts[2]),
-                                decimal.Parse(parts[3]),
-                                parts[4]
-                            ));
-                        }
-                    }
-                }
-
-                RefreshDataGridView();
-                MessageBox.Show("Данные загружены успешно", "Загрузка",
-                              MessageBoxButtons.OK, MessageBoxIcon.Information);
-                toolStripStatusLabelInfo.Text = "Данные загружены из файла";
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при загрузке: {ex.Message}", "Ошибка",
-                              MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            LoadData();
         }
 
-        // 7. Кнопка "Сортировка"
-        private void buttonSort_Click(object sender, EventArgs e)
-        {
-            // Простая сортировка по названию
-            products.Sort((p1, p2) => p1.Name.CompareTo(p2.Name));
-            RefreshDataGridView();
-            toolStripStatusLabelInfo.Text = "Сортировка по названию";
-        }
-
-        // 8. Кнопка "Статистика"
-        private void buttonStatistics_Click(object sender, EventArgs e)
+        private void ButtonStatistics_Click(object sender, EventArgs e)
         {
             if (products.Count == 0)
             {
-                MessageBox.Show("Нет данных для статистики", "Внимание",
-                              MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("РќРµС‚ РґР°РЅРЅС‹С… РґР»СЏ СЃС‚Р°С‚РёСЃС‚РёРєРё", "РРЅС„РѕСЂРјР°С†РёСЏ",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            decimal totalValue = 0;
-            int totalQuantity = 0;
+            string stats = $"РЎС‚Р°С‚РёСЃС‚РёРєР°:\n" +
+                          $"Р’СЃРµРіРѕ С‚РѕРІР°СЂРѕРІ: {products.Count}\n" +
+                          $"РћР±С‰РµРµ РєРѕР»РёС‡РµСЃС‚РІРѕ: {products.Sum(p => p.Quantity)}\n" +
+                          $"РЎСЂРµРґРЅСЏСЏ С†РµРЅР°: {products.Average(p => p.Price):C2}\n" +
+                          $"РћР±С‰Р°СЏ СЃС‚РѕРёРјРѕСЃС‚СЊ: {products.Sum(p => p.Quantity * p.Price):C2}";
 
-            foreach (var product in products)
-            {
-                totalValue += product.Price * product.Quantity;
-                totalQuantity += product.Quantity;
-            }
-
-            string stats = $"Общая статистика:\n" +
-                          $"Всего товаров: {products.Count}\n" +
-                          $"Общее количество: {totalQuantity} шт.\n" +
-                          $"Общая стоимость: {totalValue:C}\n" +
-                          $"Средняя цена: {totalValue / totalQuantity:C}";
-
-            MessageBox.Show(stats, "Статистика",
-                          MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(stats, "РЎС‚Р°С‚РёСЃС‚РёРєР°", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        // 9. Кнопка "График"
-        private void buttonChart_Click(object sender, EventArgs e)
+        private void ButtonChart_Click(object sender, EventArgs e)
         {
             if (products.Count == 0)
             {
-                MessageBox.Show("Нет данных для графика", "Внимание",
-                              MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("РќРµС‚ РґР°РЅРЅС‹С… РґР»СЏ РіСЂР°С„РёРєР°", "РРЅС„РѕСЂРјР°С†РёСЏ",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            // Показываем простой диалог
-            MessageBox.Show("Здесь будет отображен график распределения товаров по количеству или цене.\n" +
-                          "Для реализации используйте Chart control из Toolbox.", "График",
-                          MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Р¤СѓРЅРєС†РёСЏ РіСЂР°С„РёРєР° Р±СѓРґРµС‚ СЂРµР°Р»РёР·РѕРІР°РЅР° РІ СЃР»РµРґСѓСЋС‰РµР№ РІРµСЂСЃРёРё", "РРЅС„РѕСЂРјР°С†РёСЏ",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        // 10. Кнопка "Сброс" в панели поиска
-        private void buttonClearSearch_Click(object sender, EventArgs e)
+        private void DataGridViewProducts_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            textBox1.Text = "";
-            RefreshDataGridView();
-            toolStripStatusLabelInfo.Text = "Поиск сброшен";
+            if (e.RowIndex >= 0)
+            {
+                ButtonEditProduct_Click(sender, e);
+            }
         }
 
-        // 11. Обработчики меню (заглушки)
-        private void товарыToolStripMenuItem_Click(object sender, EventArgs e)
+        private void FormMain_Load(object sender, EventArgs e)
         {
-            
+            toolStripStatusLabelInfo.Text = "Р“РѕС‚РѕРІРѕ Рє СЂР°Р±РѕС‚Рµ";
         }
 
-        private void открытьToolStripMenuItem_Click(object sender, EventArgs e)
+        private void РћРџСЂРѕРіСЂР°РјРјРµToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            buttonLoad_Click(sender, e);
-        }
-
-        private void сохранитьToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            buttonSave_Click(sender, e);
+            MessageBox.Show("РџСЂРѕРіСЂР°РјРјР° СѓРїСЂР°РІР»РµРЅРёСЏ Р±Р°Р·РѕР№ С‚РѕРІР°СЂРѕРІ\nР’РµСЂСЃРёСЏ 1.0", "Рћ РїСЂРѕРіСЂР°РјРјРµ",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }

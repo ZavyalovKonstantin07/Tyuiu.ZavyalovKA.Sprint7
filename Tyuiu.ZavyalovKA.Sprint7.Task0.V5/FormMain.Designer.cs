@@ -300,7 +300,7 @@
             buttonEditProduct.TabIndex = 1;
             buttonEditProduct.Text = "Редактировать";
             buttonEditProduct.UseVisualStyleBackColor = true;
-            buttonEditProduct.Click += this.buttonEditProduct_Click;
+
             // 
             // buttonAddProduct
             // 
@@ -311,7 +311,7 @@
             buttonAddProduct.TabIndex = 0;
             buttonAddProduct.Text = "Добавить";
             buttonAddProduct.UseVisualStyleBackColor = true;
-            buttonAddProduct.Click += this.buttonAddProduct_Click;
+
             // 
             // panelSearch
             // 
@@ -378,7 +378,7 @@
             dataGridViewProducts.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dataGridViewProducts.Size = new Size(1184, 461);
             dataGridViewProducts.TabIndex = 3;
-            dataGridViewProducts.CellContentClick += this.dataGridViewProducts_CellContentClick;
+
             // 
             // CodeColumn
             // 
