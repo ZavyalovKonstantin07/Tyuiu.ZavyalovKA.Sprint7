@@ -123,6 +123,7 @@
             buttonOK.TabIndex = 8;
             buttonOK.Text = "ОК";
             buttonOK.UseVisualStyleBackColor = true;
+            buttonOK.Click += new System.EventHandler(buttonOK_Click); // ДОБАВЬТЕ ЭТУ СТРОКУ
             // 
             // buttonCancel
             // 
@@ -132,6 +133,7 @@
             buttonCancel.TabIndex = 9;
             buttonCancel.Text = "Отмена";
             buttonCancel.UseVisualStyleBackColor = true;
+            buttonCancel.Click += new System.EventHandler(buttonCancel_Click); // ДОБАВЬТЕ ЭТУ СТРОКУ
             // 
             // FormAddEditProduct
             // 
