@@ -24,7 +24,7 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5.Test
             };
         }
 
-        // ================== ГЕНЕРАЦИЯ КОДА ==================
+        // Генерация кода
 
         [TestMethod]
         public void GenerateNextProductCode_ReturnsCorrectCode()
@@ -33,7 +33,7 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5.Test
             Assert.AreEqual("004", nextCode);
         }
 
-        // ================== СОРТИРОВКА ==================
+        // Сортировка
 
         [TestMethod]
         public void SortProductsByName_Ascending_WorksCorrectly()
@@ -49,7 +49,7 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5.Test
             Assert.AreEqual(70m, sorted[0].Price);
         }
 
-        // ================== ФИЛЬТРАЦИЯ ==================
+        //  Фильтрация
 
         [TestMethod]
         public void FilterProductsByQuantityRange_ReturnsCorrectCount()
@@ -58,7 +58,7 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5.Test
             Assert.AreEqual(2, filtered.Count);
         }
 
-        // ================== СОХРАНЕНИЕ / ЗАГРУЗКА ==================
+        //  Сохранение и загрузка
 
         [TestMethod]
         public void SaveAndLoadProducts_FileWorksCorrectly()
@@ -73,7 +73,7 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5.Test
                 File.Delete(testFilePath);
         }
 
-        // ================== СТАТИСТИКА ==================
+        // Статистика
 
         [TestMethod]
         public void GetStatistics_ReturnsCorrectText()

@@ -12,6 +12,10 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
     public partial class FormMain : Form
     {
         private List<Product> products = new List<Product>();
+        private List<Product> originalProducts = new List<Product>();
+        private bool isSorted = false;
+        private int sortMode = -1; // -1 = не сортировано, 0 = имя, 1 = количество, 2 = цена
+
         private readonly string dataFilePath = "products.csv";
         private readonly string backupFilePath = "products_backup.csv";
         private readonly DataService dataService = new DataService();
@@ -70,6 +74,7 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
             статистикаToolStripMenuItem.Click += ButtonStatistics_Click;
             графикиToolStripMenuItem.Click += ButtonChart_Click;
             оПрограммеToolStripMenuItem.Click += ОПрограммеToolStripMenuItem_Click;
+            руководствоToolStripMenuItem.Click += РуководствоToolStripMenuItem_Click;
 
             // Таблица
             dataGridViewProducts.CellDoubleClick += DataGridViewProducts_CellDoubleClick;
@@ -96,6 +101,10 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
                     LoadDefaultProducts();
                     SaveToCSV(dataFilePath);
                 }
+                originalProducts = new List<Product>(products);
+                isSorted = false;
+                sortMode = -1;
+                buttonSort.Text = "Сортировка";
 
                 RefreshDataGridView();
                 UpdateStatusBar($"Загружено {products.Count} записей");
@@ -221,7 +230,7 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
             dataGridViewProducts.DataSource = null;
             dataGridViewProducts.DataSource = products;
 
-            // Обновляем статус бар
+
             UpdateStatusBar();
         }
 
@@ -235,7 +244,7 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
                 toolStripStatusLabelInfo.Text = status;
             }
 
-            // Рассчитываем общую стоимость
+            // Общая стоимость
             if (products.Count > 0)
             {
                 decimal totalValue = products.Sum(p => p.Quantity * p.Price);
@@ -263,9 +272,54 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
 
         private void SortProducts()
         {
-            products = dataService.SortProductsByName(products, true);
-            RefreshDataGridView();
-            UpdateStatusBar("Отсортировано по названию");
+            if (products.Count == 0) return;
+
+            try
+            {
+                if (isSorted && sortMode == 2)
+                {
+                    products = new List<Product>(originalProducts);
+                    buttonSort.Text = "Сортировка";
+                    UpdateStatusBar("Восстановлен исходный порядок");
+                    isSorted = false;
+                    sortMode = -1;
+                }
+                else
+                {
+                    int nextMode = (sortMode + 1) % 3;
+
+                    switch (nextMode)
+                    {
+                        case 0: // По имени
+                            products = products.OrderBy(p => p.Name).ToList();
+                            buttonSort.Text = "Имя ";
+                            UpdateStatusBar("Отсортировано по имени (А-Я)");
+                            break;
+
+                        case 1: // По количеству
+                            products = products.OrderByDescending(p => p.Quantity).ToList();
+                            buttonSort.Text = "Кол-во ";
+                            UpdateStatusBar("Отсортировано по количеству (по убыванию)");
+                            break;
+
+                        case 2: // По цене
+                            products = products.OrderByDescending(p => p.Price).ToList();
+                            buttonSort.Text = "Цена ";
+                            UpdateStatusBar("Отсортировано по цене (по убыванию)");
+                            break;
+                    }
+
+                    sortMode = nextMode;
+                    isSorted = true;
+                }
+
+                RefreshDataGridView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка сортировки: {ex.Message}", "Ошибка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void FilterProducts()
@@ -274,6 +328,7 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
             dataGridViewProducts.DataSource = filtered;
             UpdateStatusBar($"Отфильтровано: {filtered.Count} товаров (количество ≥ 10)");
         }
+
         private void ButtonAddProduct_Click(object sender, EventArgs e)
         {
             using (var form = new FormAddEditProduct())
@@ -285,12 +340,17 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
                         string code = dataService.GenerateNextProductCode(products);
                         var newProduct = new Product(
                             code,
-                            form.ItemName,          
-                            form.ItemQuantity,      
-                            form.ItemPrice,         
-                            form.ItemDescription);  
+                            form.ItemName,
+                            form.ItemQuantity,
+                            form.ItemPrice,
+                            form.ItemDescription);
 
                         products.Add(newProduct);
+                        originalProducts.Add(new Product(newProduct.Code, newProduct.Name, newProduct.Quantity, newProduct.Price, newProduct.Description));
+                        isSorted = false;
+                        sortMode = -1;
+                        buttonSort.Text = "Сортировка";
+
                         SaveToCSV(dataFilePath);
                         RefreshDataGridView();
                         UpdateStatusBar("Товар добавлен");
@@ -320,21 +380,34 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
 
             using (var form = new FormAddEditProduct())
             {
-                form.ItemName = product.Name;           
-                form.ItemQuantity = product.Quantity;   
-                form.ItemPrice = product.Price;         
-                form.ItemDescription = product.Description; 
+                form.ItemName = product.Name;
+                form.ItemQuantity = product.Quantity;
+                form.ItemPrice = product.Price;
+                form.ItemDescription = product.Description;
 
                 if (form.ShowDialog() == DialogResult.OK)
                 {
                     try
                     {
                         string originalCode = product.Code;
-                        product.Name = form.ItemName;           
-                        product.Quantity = form.ItemQuantity;   
-                        product.Price = form.ItemPrice;        
-                        product.Description = form.ItemDescription; 
+                        product.Name = form.ItemName;
+                        product.Quantity = form.ItemQuantity;
+                        product.Price = form.ItemPrice;
+                        product.Description = form.ItemDescription;
                         product.Code = originalCode;
+                        var originalProduct = originalProducts.FirstOrDefault(p => p.Code == originalCode);
+                        if (originalProduct != null)
+                        {
+                            originalProduct.Name = form.ItemName;
+                            originalProduct.Quantity = form.ItemQuantity;
+                            originalProduct.Price = form.ItemPrice;
+                            originalProduct.Description = form.ItemDescription;
+                        }
+
+                        isSorted = false;
+                        sortMode = -1;
+                        buttonSort.Text = "Сортировка";
+
                         SaveToCSV(dataFilePath);
                         RefreshDataGridView();
                         UpdateStatusBar("Товар изменён");
@@ -368,6 +441,11 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
                 try
                 {
                     products.Remove(product);
+                    originalProducts.Remove(product);
+                    isSorted = false;
+                    sortMode = -1;
+                    buttonSort.Text = "Сортировка";
+
                     SaveToCSV(dataFilePath);
                     RefreshDataGridView();
                     UpdateStatusBar("Товар удалён");
@@ -446,13 +524,20 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
                 return;
             }
 
-            string stats = $"Статистика:\n" +
-                          $"Всего товаров: {products.Count}\n" +
-                          $"Общее количество: {products.Sum(p => p.Quantity)}\n" +
-                          $"Средняя цена: {products.Average(p => p.Price):C2}\n" +
-                          $"Общая стоимость: {products.Sum(p => p.Quantity * p.Price):C2}";
+            string stats = $"СТАТИСТИКА:\n" +
+                           $"───────────\n" +
+                           $"Товаров: {products.Count}\n" +
+                           $"Всего на складе: {products.Sum(p => p.Quantity)} шт.\n" +
+                           $"Общая стоимость: {products.Sum(p => p.Quantity * p.Price):C2}\n" +
+                           $"───────────\n" +
+                           $"Средняя цена: {products.Average(p => p.Price):C2}\n" +
+                           $"Самый дорогой: {products.Max(p => p.Price):C2}\n" +
+                           $"Самый дешевый: {products.Min(p => p.Price):C2}\n" +
+                           $"───────────\n" +
+                           $"Требуют пополнения (<10 шт.): {products.Count(p => p.Quantity < 10)}";
 
-            MessageBox.Show(stats, "Статистика", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(stats, "Статистика",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void ButtonChart_Click(object sender, EventArgs e)
@@ -483,8 +568,36 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
 
         private void ОПрограммеToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Программа управления базой товаров\nВерсия 1.0", "О программе",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(
+     "Оптовая База v1.0\n" +
+     "Автор: Завьялов Константин\n" +
+     "Группа: РППБ-25-1\n\n" +
+     "Программа для учета товаров на складе.",
+     "О программе",
+     MessageBoxButtons.OK,
+     MessageBoxIcon.Information
+         );
+
+        }
+             private void РуководствоToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(
+                "РУКОВОДСТВО ПО ИСПОЛЬЗОВАНИЮ\n\n" +
+
+                "Добавление: кнопка 'Добавить'\n" +
+                "Редактирование: выберите товар → 'Редактировать'\n" +
+                "Удаление: выберите товар → 'Удалить'\n" +
+                "Поиск: введите текст → 'Найти'\n" +
+                "Сортировка: кнопка 'Сортировка'\n" +
+                "Фильтрация: кнопка 'Фильтр'\n" +
+                "Сохранение: кнопка 'Сохранить'\n" +
+                "Статистика: кнопка 'Статистика'\n\n" +
+
+                "Данные сохраняются автоматически в CSV файл.",
+                "Руководство",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
         }
     }
 }

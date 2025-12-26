@@ -28,8 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle5 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle6 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
             menuStripMain = new MenuStrip();
             файлToolStripMenuItem = new ToolStripMenuItem();
             открытьToolStripMenuItem = new ToolStripMenuItem();
@@ -115,7 +115,6 @@
             товарыToolStripMenuItem.Name = "товарыToolStripMenuItem";
             товарыToolStripMenuItem.Size = new Size(75, 20);
             товарыToolStripMenuItem.Text = "Операции";
-
             // 
             // добавитьТоварToolStripMenuItem
             // 
@@ -300,7 +299,6 @@
             buttonEditProduct.TabIndex = 1;
             buttonEditProduct.Text = "Редактировать";
             buttonEditProduct.UseVisualStyleBackColor = true;
-
             // 
             // buttonAddProduct
             // 
@@ -311,7 +309,6 @@
             buttonAddProduct.TabIndex = 0;
             buttonAddProduct.Text = "Добавить";
             buttonAddProduct.UseVisualStyleBackColor = true;
-
             // 
             // panelSearch
             // 
@@ -320,7 +317,6 @@
             panelSearch.Controls.Add(buttonSearchExecute);
             panelSearch.Controls.Add(textBox1);
             panelSearch.Controls.Add(labelSearch);
-            panelSearch.Dock = DockStyle.Top;
             panelSearch.Location = new Point(0, 65);
             panelSearch.Name = "panelSearch";
             panelSearch.Size = new Size(1184, 35);
@@ -328,28 +324,30 @@
             // 
             // buttonClearSearch
             // 
-            buttonClearSearch.Location = new Point(1031, 9);
+            buttonClearSearch.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonClearSearch.Location = new Point(1042, 4);
             buttonClearSearch.Name = "buttonClearSearch";
-            buttonClearSearch.Size = new Size(80, 23);
+            buttonClearSearch.Size = new Size(80, 28);
             buttonClearSearch.TabIndex = 3;
             buttonClearSearch.Text = "Сброс";
             buttonClearSearch.UseVisualStyleBackColor = true;
             // 
             // buttonSearchExecute
             // 
-            buttonSearchExecute.Location = new Point(880, 9);
+            buttonSearchExecute.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonSearchExecute.Location = new Point(881, 4);
             buttonSearchExecute.Name = "buttonSearchExecute";
-            buttonSearchExecute.Size = new Size(80, 23);
+            buttonSearchExecute.Size = new Size(80, 28);
             buttonSearchExecute.TabIndex = 2;
             buttonSearchExecute.Text = "Найти";
             buttonSearchExecute.UseVisualStyleBackColor = true;
             // 
             // textBox1
             // 
-            textBox1.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            textBox1.Location = new Point(240, 6);
+            textBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textBox1.Location = new Point(120, 6);
             textBox1.Name = "textBox1";
-            textBox1.Size = new Size(474, 23);
+            textBox1.Size = new Size(300, 23);
             textBox1.TabIndex = 1;
             // 
             // labelSearch
@@ -365,11 +363,11 @@
             // 
             dataGridViewProducts.AllowUserToAddRows = false;
             dataGridViewProducts.AllowUserToDeleteRows = false;
+            dataGridViewProducts.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             dataGridViewProducts.BackgroundColor = Color.White;
             dataGridViewProducts.BorderStyle = BorderStyle.Fixed3D;
             dataGridViewProducts.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewProducts.Columns.AddRange(new DataGridViewColumn[] { CodeColumn, NameColumn, QuantityColumn, PriceColumn, DescriptionColumn });
-            dataGridViewProducts.Dock = DockStyle.Fill;
             dataGridViewProducts.Location = new Point(0, 100);
             dataGridViewProducts.MultiSelect = false;
             dataGridViewProducts.Name = "dataGridViewProducts";
@@ -378,7 +376,6 @@
             dataGridViewProducts.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dataGridViewProducts.Size = new Size(1184, 461);
             dataGridViewProducts.TabIndex = 3;
-
             // 
             // CodeColumn
             // 
@@ -396,16 +393,16 @@
             // 
             // QuantityColumn
             // 
-            dataGridViewCellStyle5.Alignment = DataGridViewContentAlignment.MiddleRight;
-            QuantityColumn.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleRight;
+            QuantityColumn.DefaultCellStyle = dataGridViewCellStyle3;
             QuantityColumn.HeaderText = "Количество";
             QuantityColumn.Name = "QuantityColumn";
             QuantityColumn.ReadOnly = true;
             // 
             // PriceColumn
             // 
-            dataGridViewCellStyle6.Alignment = DataGridViewContentAlignment.MiddleRight;
-            PriceColumn.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleRight;
+            PriceColumn.DefaultCellStyle = dataGridViewCellStyle4;
             PriceColumn.HeaderText = "Цена(руб)";
             PriceColumn.Name = "PriceColumn";
             PriceColumn.ReadOnly = true;
@@ -430,7 +427,7 @@
             // toolStripStatusLabelInfo
             // 
             toolStripStatusLabelInfo.Name = "toolStripStatusLabelInfo";
-            toolStripStatusLabelInfo.Size = new Size(1038, 17);
+            toolStripStatusLabelInfo.Size = new Size(1069, 17);
             toolStripStatusLabelInfo.Spring = true;
             toolStripStatusLabelInfo.Text = "Готово";
             // 
