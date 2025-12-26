@@ -207,15 +207,15 @@
             panelToolbar.Dock = DockStyle.Top;
             panelToolbar.Location = new Point(0, 24);
             panelToolbar.Name = "panelToolbar";
-            panelToolbar.Size = new Size(1184, 41);
+            panelToolbar.Size = new Size(1184, 50); 
             panelToolbar.TabIndex = 1;
             // 
             // buttonChart
             // 
             buttonChart.FlatStyle = FlatStyle.Flat;
-            buttonChart.Location = new Point(1046, 3);
+            buttonChart.Location = new Point(1046, 10); 
             buttonChart.Name = "buttonChart";
-            buttonChart.Size = new Size(75, 23);
+            buttonChart.Size = new Size(100, 30); 
             buttonChart.TabIndex = 9;
             buttonChart.Text = "График";
             buttonChart.UseVisualStyleBackColor = true;
@@ -223,9 +223,9 @@
             // buttonStatistics
             // 
             buttonStatistics.FlatStyle = FlatStyle.Flat;
-            buttonStatistics.Location = new Point(917, 3);
+            buttonStatistics.Location = new Point(917, 10); 
             buttonStatistics.Name = "buttonStatistics";
-            buttonStatistics.Size = new Size(79, 23);
+            buttonStatistics.Size = new Size(100, 30); 
             buttonStatistics.TabIndex = 8;
             buttonStatistics.Text = "Статистика";
             buttonStatistics.UseVisualStyleBackColor = true;
@@ -233,9 +233,9 @@
             // buttonLoad
             // 
             buttonLoad.FlatStyle = FlatStyle.Flat;
-            buttonLoad.Location = new Point(794, 3);
+            buttonLoad.Location = new Point(794, 10); 
             buttonLoad.Name = "buttonLoad";
-            buttonLoad.Size = new Size(75, 23);
+            buttonLoad.Size = new Size(100, 30); 
             buttonLoad.TabIndex = 7;
             buttonLoad.Text = "Загрузить";
             buttonLoad.UseVisualStyleBackColor = true;
@@ -243,9 +243,9 @@
             // buttonSave
             // 
             buttonSave.FlatStyle = FlatStyle.Flat;
-            buttonSave.Location = new Point(678, 3);
+            buttonSave.Location = new Point(678, 10); 
             buttonSave.Name = "buttonSave";
-            buttonSave.Size = new Size(75, 23);
+            buttonSave.Size = new Size(100, 30); 
             buttonSave.TabIndex = 6;
             buttonSave.Text = "Сохранить";
             buttonSave.UseVisualStyleBackColor = true;
@@ -253,9 +253,9 @@
             // buttonFilter
             // 
             buttonFilter.FlatStyle = FlatStyle.Flat;
-            buttonFilter.Location = new Point(562, 3);
+            buttonFilter.Location = new Point(562, 10); 
             buttonFilter.Name = "buttonFilter";
-            buttonFilter.Size = new Size(75, 23);
+            buttonFilter.Size = new Size(100, 30); 
             buttonFilter.TabIndex = 5;
             buttonFilter.Text = "Фильтр";
             buttonFilter.UseVisualStyleBackColor = true;
@@ -263,9 +263,9 @@
             // buttonSort
             // 
             buttonSort.FlatStyle = FlatStyle.Flat;
-            buttonSort.Location = new Point(443, 3);
+            buttonSort.Location = new Point(443, 10); 
             buttonSort.Name = "buttonSort";
-            buttonSort.Size = new Size(83, 23);
+            buttonSort.Size = new Size(100, 30); 
             buttonSort.TabIndex = 4;
             buttonSort.Text = "Сортировка";
             buttonSort.UseVisualStyleBackColor = true;
@@ -273,9 +273,9 @@
             // buttonSearch
             // 
             buttonSearch.FlatStyle = FlatStyle.Flat;
-            buttonSearch.Location = new Point(339, 3);
+            buttonSearch.Location = new Point(339, 10); 
             buttonSearch.Name = "buttonSearch";
-            buttonSearch.Size = new Size(75, 23);
+            buttonSearch.Size = new Size(100, 30); 
             buttonSearch.TabIndex = 3;
             buttonSearch.Text = "Поиск";
             buttonSearch.UseVisualStyleBackColor = true;
@@ -283,9 +283,9 @@
             // buttonDeleteProduct
             // 
             buttonDeleteProduct.FlatStyle = FlatStyle.Flat;
-            buttonDeleteProduct.Location = new Point(239, 3);
+            buttonDeleteProduct.Location = new Point(239, 10); 
             buttonDeleteProduct.Name = "buttonDeleteProduct";
-            buttonDeleteProduct.Size = new Size(75, 23);
+            buttonDeleteProduct.Size = new Size(100, 30); 
             buttonDeleteProduct.TabIndex = 2;
             buttonDeleteProduct.Text = "Удалить";
             buttonDeleteProduct.UseVisualStyleBackColor = true;
@@ -293,9 +293,9 @@
             // buttonEditProduct
             // 
             buttonEditProduct.FlatStyle = FlatStyle.Flat;
-            buttonEditProduct.Location = new Point(117, 3);
+            buttonEditProduct.Location = new Point(117, 10); 
             buttonEditProduct.Name = "buttonEditProduct";
-            buttonEditProduct.Size = new Size(98, 23);
+            buttonEditProduct.Size = new Size(100, 30); 
             buttonEditProduct.TabIndex = 1;
             buttonEditProduct.Text = "Редактировать";
             buttonEditProduct.UseVisualStyleBackColor = true;
@@ -303,9 +303,9 @@
             // buttonAddProduct
             // 
             buttonAddProduct.FlatStyle = FlatStyle.Flat;
-            buttonAddProduct.Location = new Point(11, 3);
+            buttonAddProduct.Location = new Point(11, 10); 
             buttonAddProduct.Name = "buttonAddProduct";
-            buttonAddProduct.Size = new Size(75, 23);
+            buttonAddProduct.Size = new Size(100, 30); 
             buttonAddProduct.TabIndex = 0;
             buttonAddProduct.Text = "Добавить";
             buttonAddProduct.UseVisualStyleBackColor = true;
@@ -317,7 +317,8 @@
             panelSearch.Controls.Add(buttonSearchExecute);
             panelSearch.Controls.Add(textBox1);
             panelSearch.Controls.Add(labelSearch);
-            panelSearch.Location = new Point(0, 65);
+            panelSearch.Dock = DockStyle.Top; 
+            panelSearch.Location = new Point(0, 74); 
             panelSearch.Name = "panelSearch";
             panelSearch.Size = new Size(1184, 35);
             panelSearch.TabIndex = 2;
@@ -325,7 +326,7 @@
             // buttonClearSearch
             // 
             buttonClearSearch.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonClearSearch.Location = new Point(1042, 4);
+            buttonClearSearch.Location = new Point(1090, 4); 
             buttonClearSearch.Name = "buttonClearSearch";
             buttonClearSearch.Size = new Size(80, 28);
             buttonClearSearch.TabIndex = 3;
@@ -335,7 +336,7 @@
             // buttonSearchExecute
             // 
             buttonSearchExecute.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonSearchExecute.Location = new Point(881, 4);
+            buttonSearchExecute.Location = new Point(1000, 4); 
             buttonSearchExecute.Name = "buttonSearchExecute";
             buttonSearchExecute.Size = new Size(80, 28);
             buttonSearchExecute.TabIndex = 2;
@@ -347,13 +348,13 @@
             textBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             textBox1.Location = new Point(120, 6);
             textBox1.Name = "textBox1";
-            textBox1.Size = new Size(300, 23);
+            textBox1.Size = new Size(874, 23); 
             textBox1.TabIndex = 1;
             // 
             // labelSearch
             // 
             labelSearch.AutoSize = true;
-            labelSearch.Location = new Point(25, 6);
+            labelSearch.Location = new Point(25, 9);
             labelSearch.Name = "labelSearch";
             labelSearch.Size = new Size(42, 15);
             labelSearch.TabIndex = 0;
@@ -363,18 +364,18 @@
             // 
             dataGridViewProducts.AllowUserToAddRows = false;
             dataGridViewProducts.AllowUserToDeleteRows = false;
-            dataGridViewProducts.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            dataGridViewProducts.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right; 
             dataGridViewProducts.BackgroundColor = Color.White;
             dataGridViewProducts.BorderStyle = BorderStyle.Fixed3D;
             dataGridViewProducts.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewProducts.Columns.AddRange(new DataGridViewColumn[] { CodeColumn, NameColumn, QuantityColumn, PriceColumn, DescriptionColumn });
-            dataGridViewProducts.Location = new Point(0, 100);
+            dataGridViewProducts.Location = new Point(0, 109); 
             dataGridViewProducts.MultiSelect = false;
             dataGridViewProducts.Name = "dataGridViewProducts";
             dataGridViewProducts.ReadOnly = true;
             dataGridViewProducts.RowHeadersWidth = 50;
             dataGridViewProducts.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dataGridViewProducts.Size = new Size(1184, 461);
+            dataGridViewProducts.Size = new Size(1184, 430); 
             dataGridViewProducts.TabIndex = 3;
             // 
             // CodeColumn
@@ -412,7 +413,7 @@
             DescriptionColumn.HeaderText = "Описание";
             DescriptionColumn.Name = "DescriptionColumn";
             DescriptionColumn.ReadOnly = true;
-            DescriptionColumn.Width = 600;
+            DescriptionColumn.Width = 400; 
             // 
             // statusStripMain
             // 
@@ -459,9 +460,12 @@
             Controls.Add(panelToolbar);
             Controls.Add(menuStripMain);
             MainMenuStrip = menuStripMain;
+            MinimumSize = new Size(1000, 600); 
             Name = "FormMain";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Оптовая База";
+            Load += FormMain_Load; 
+            Resize += FormMain_Resize;
             menuStripMain.ResumeLayout(false);
             menuStripMain.PerformLayout();
             panelToolbar.ResumeLayout(false);

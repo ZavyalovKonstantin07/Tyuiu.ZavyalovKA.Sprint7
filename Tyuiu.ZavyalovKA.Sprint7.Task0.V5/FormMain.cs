@@ -24,6 +24,7 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
         {
             InitializeComponent();
             ConfigureDataGridView();
+            InitializeToolbarLayout(); 
             LoadData();
             InitializeEventHandlers();
         }
@@ -41,6 +42,61 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
             QuantityColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             PriceColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             PriceColumn.DefaultCellStyle.Format = "C2";
+        }
+
+
+        private void InitializeToolbarLayout()
+        {
+            foreach (Control control in panelToolbar.Controls)
+            {
+                if (control is Button button)
+                {
+                    button.Height = 30; 
+                }
+            }
+            ArrangeToolbarButtons();
+        }
+
+        private void ArrangeToolbarButtons()
+        {
+            if (panelToolbar == null) return;
+            var buttons = panelToolbar.Controls.OfType<Button>().ToList();
+            if (buttons.Count == 0) return;
+            buttons = buttons.OrderBy(b => b.Left).ToList();
+            int panelWidth = panelToolbar.ClientSize.Width;
+            int buttonCount = buttons.Count;
+            int spacing = 10; 
+            int margin = 5;  
+            int availableWidth = panelWidth - (spacing * (buttonCount - 1)) - (margin * 2);
+            int buttonWidth = availableWidth / buttonCount;
+            buttonWidth = Math.Max(80, Math.Min(buttonWidth, 150));
+            int x = margin;
+            int buttonHeight = 30;
+            int y = (panelToolbar.Height - buttonHeight) / 2;
+
+            foreach (Button button in buttons)
+            {
+                button.Location = new Point(x, y);
+                button.Size = new Size(buttonWidth, buttonHeight);
+                x += buttonWidth + spacing;
+            }
+        }
+
+        private void UpdateSearchButtonsPosition()
+        {
+            if (panelSearch == null || buttonSearchExecute == null || buttonClearSearch == null)
+                return;
+
+            int panelWidth = panelSearch.Width;
+            int buttonWidth = 80;
+            int padding = 10;
+            buttonClearSearch.Left = panelWidth - buttonWidth - padding;
+            buttonSearchExecute.Left = buttonClearSearch.Left - buttonWidth - padding;
+
+            if (textBox1 != null)
+            {
+                textBox1.Width = buttonSearchExecute.Left - textBox1.Left - padding;
+            }
         }
 
         private void InitializeEventHandlers()
@@ -80,7 +136,8 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
             dataGridViewProducts.CellDoubleClick += DataGridViewProducts_CellDoubleClick;
 
             // Форма
-            this.Load += FormMain_Load;
+           Load += FormMain_Load;
+           Resize += FormMain_Resize; 
         }
 
         private void LoadData()
@@ -226,7 +283,7 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
 
         private void RefreshDataGridView()
         {
-            // Привязываем данные
+
             dataGridViewProducts.DataSource = null;
             dataGridViewProducts.DataSource = products;
 
@@ -244,7 +301,7 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
                 toolStripStatusLabelInfo.Text = status;
             }
 
-            // Общая стоимость
+
             if (products.Count > 0)
             {
                 decimal totalValue = products.Sum(p => p.Quantity * p.Price);
@@ -563,7 +620,15 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
 
         private void FormMain_Load(object sender, EventArgs e)
         {
+            ArrangeToolbarButtons(); 
+            UpdateSearchButtonsPosition(); 
             toolStripStatusLabelInfo.Text = "Готово к работе";
+        }
+
+        private void FormMain_Resize(object sender, EventArgs e)
+        {
+            ArrangeToolbarButtons(); 
+            UpdateSearchButtonsPosition(); 
         }
 
         private void ОПрограммеToolStripMenuItem_Click(object sender, EventArgs e)
@@ -577,9 +642,9 @@ namespace Tyuiu.ZavyalovKA.Sprint7.Task0.V5
      MessageBoxButtons.OK,
      MessageBoxIcon.Information
          );
-
         }
-             private void РуководствоToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void РуководствоToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show(
                 "РУКОВОДСТВО ПО ИСПОЛЬЗОВАНИЮ\n\n" +
